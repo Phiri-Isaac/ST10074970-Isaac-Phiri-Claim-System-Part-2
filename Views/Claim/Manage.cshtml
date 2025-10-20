@@ -1,0 +1,99 @@
+@model IEnumerable<ClaimSystem.Models.Claim>
+
+@{
+    ViewData["Title"] = "Manage Claims";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="text-center mb-4">Manage Claims</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="@(TempData["AlertClass"] ?? "alert-info") alert text-center fw-bold">
+        @TempData["Message"]
+    </div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered table-hover text-center align-middle shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Lecturer Name</th>
+                <th>Hours Worked</th>
+                <th>Hourly Rate (R)</th>
+                <th>Total (R)</th>
+                <th>Status</th>
+                <th>Document</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var claim in Model)
+            {
+                <tr>
+                    <td>@claim.Id</td>
+                    <td>@(string.IsNullOrWhiteSpace(claim.LecturerName) ? "<i>Not specified</i>" : claim.LecturerName)</td>
+                    <td>@claim.HoursWorked.ToString("F2")</td>
+                    <td>@claim.HourlyRate.ToString("F2")</td>
+                    <td>@claim.TotalAmount.ToString("F2")</td>
+                    <td>
+                        <span class="badge px-3 py-2 fs-6 @(claim.Status == "Approved" ? "bg-success" :
+                                                            claim.Status == "Rejected" ? "bg-danger" :
+                                                            claim.Status == "Verified" ? "bg-primary" : "bg-warning text-dark")">
+                            @claim.Status
+                        </span>
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(claim.SupportingDocumentPath))
+                        {
+                            <a href="@claim.SupportingDocumentPath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark-text"></i> View
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">None</span>
+                        }
+                    </td>
+                    <td>
+                        @if (claim.Status == "Pending")
+                        {
+                            <form asp-action="Approve" asp-controller="Claim" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@claim.Id" />
+                                <button type="submit" class="btn btn-success btn-sm me-1" onclick="return confirm('Are you sure you want to APPROVE this claim?');">
+                                    <i class="bi bi-check-circle"></i> Approve
+                                </button>
+                            </form>
+
+                            <form asp-action="Reject" asp-controller="Claim" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@claim.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to REJECT this claim?');">
+                                    <i class="bi bi-x-circle"></i> Reject
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No action</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info text-center">No claims have been submitted yet.</div>
+}
+
+<div class="text-center mt-4">
+    <a asp-action="Submit" asp-controller="Claim" class="btn btn-primary px-4">
+        <i class="bi bi-plus-circle"></i> Submit New Claim
+    </a>
+</div>
+

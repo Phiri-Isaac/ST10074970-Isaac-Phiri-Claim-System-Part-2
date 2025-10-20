@@ -1,0 +1,80 @@
+@model IEnumerable<ClaimSystem.Models.Claim>
+
+@{
+    ViewData["Title"] = "HOD Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="text-center mb-4">HOD Dashboard</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="@(TempData["AlertClass"] ?? "alert-info") alert text-center fw-bold">
+        @TempData["Message"]
+    </div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered table-hover text-center align-middle shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Lecturer</th>
+                <th>Total (R)</th>
+                <th>Status</th>
+                <th>Verified By</th>
+                <th>Verified Date</th>
+                <th>HOD Comments</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var claim in Model)
+            {
+                <tr>
+                    <td>@claim.Id</td>
+                    <td>@claim.LecturerName</td>
+                    <td>@claim.TotalAmount.ToString("F2")</td>
+                    <td>
+                        <span class="badge @(claim.Status == "Verified" ? "bg-primary" :
+                                            claim.Status == "Returned" ? "bg-warning text-dark" :
+                                            claim.Status == "Approved" ? "bg-success" :
+                                            claim.Status == "Rejected" ? "bg-danger" : "bg-secondary")">@claim.Status</span>
+                    </td>
+                    <td>@(claim.VerifiedBy ?? "-")</td>
+                    <td>@(claim.VerifiedDate?.ToString("dd MMM yyyy HH:mm") ?? "-")</td>
+                    <td>@(claim.HODComments ?? "-")</td>
+                    <td>
+                        @if (claim.Status != "Verified")
+                        {
+                            <form asp-action="Verify" asp-controller="HOD" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@claim.Id" />
+                                <input type="hidden" name="comments" value="Verified by HOD" />
+                                <button type="submit" class="btn btn-primary btn-sm me-1" onclick="return confirm('Verify this claim?');">Verify</button>
+                            </form>
+
+                            <form asp-action="Return" asp-controller="HOD" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@claim.Id" />
+                                <input type="hidden" name="comments" value="Return for correction" />
+                                <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Return this claim for correction?');">Return</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No action</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info text-center">No claims have been submitted yet.</div>
+}
+
+

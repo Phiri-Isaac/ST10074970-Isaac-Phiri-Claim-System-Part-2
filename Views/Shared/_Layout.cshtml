@@ -1,0 +1,44 @@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Claim System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+</head>
+
+<body class="bg-light">
+    <header class="bg-dark text-white py-3 mb-4">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="h4 m-0">Contract Monthly Claim System</h1>
+            <nav>
+                <a href="/" class="text-white text-decoration-none me-3">Home</a>
+                <a href="/Claim/Submit" class="text-white text-decoration-none me-3">Submit Claim</a>
+                <a href="/Claim/Manage" class="text-white text-decoration-none me-3">Manage Claims</a>
+                <a href="/HOD" class="text-white text-decoration-none me-3">HOD Dashboard</a>
+                <a href="/Account/Role" class="text-white text-decoration-none">Switch Role</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container my-4">
+        <div class="mb-3 text-end">
+            <small class="text-muted">Current role: @HttpContextAccessor.HttpContext?.Session.GetString("Role") ?? "Lecturer"</small>
+        </div>
+        @RenderBody()
+    </main>
+
+    <footer class="text-center py-3 mt-4 bg-dark text-white">
+        <small>&copy; @DateTime.Now.Year - Claim System</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+
