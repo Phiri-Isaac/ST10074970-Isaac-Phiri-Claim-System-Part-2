@@ -65,7 +65,7 @@ namespace ClaimSystem.Controllers
                 claim.SupportingDocumentPath = "/uploads/" + fileName;
             }
 
-            // AUTO-CALCULATE HOURS + TOTAL
+            // ✅ Push 6 — Auto-calculate HoursWorked and TotalAmount
             claim.AutoCalculate();
 
             // Save in repository
