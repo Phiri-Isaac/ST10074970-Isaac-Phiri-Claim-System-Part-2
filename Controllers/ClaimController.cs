@@ -122,7 +122,8 @@ namespace ClaimSystem.Controllers
             if (claim != null)
             {
                 claim.Status = "Rejected";
-                claim.Notes = reason; // storing rejection reason in Notes
+                claim.Notes = reason;          // existing field
+                claim.HODComments = reason;    // ✅ Push 9 addition
 
                 TempData["Message"] = $"⚠️ Claim #{id} rejected.";
                 TempData["AlertClass"] = "alert-warning";
