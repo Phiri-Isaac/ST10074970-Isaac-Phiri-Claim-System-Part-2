@@ -25,10 +25,29 @@ namespace ClaimSystem.Models
 
         public string? Notes { get; set; }
 
+        // NEW FIELD: When claim was submitted
+        public DateTime SubmittedDate { get; set; } = DateTime.Now;
+
+        // Computed total payment (automatically calculated)
+        [DataType(DataType.Currency)]
+        public decimal TotalPayment => CalculateTotalPayment();
+
+        private decimal CalculateTotalPayment()
+        {
+            try
+            {
+                // Basic calculation: hours * hourly rate
+                return Math.Round(HoursWorked * HourlyRate, 2);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
         // HOD fields
         public string? VerifiedBy { get; set; }
         public DateTime? VerifiedDate { get; set; }
         public string? HODComments { get; set; }
     }
 }
-

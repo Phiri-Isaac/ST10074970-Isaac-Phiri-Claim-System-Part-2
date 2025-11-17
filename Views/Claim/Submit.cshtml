@@ -46,9 +46,18 @@
             <i class="bi bi-send"></i> Submit Claim
         </button>
     </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Total Payment (calculated)</label>
+        <div class="form-control" id="TotalPaymentDisplay">0.00</div>
+        <input type="hidden" name="TotalPayment" value="0" />
+    </div>
 </form>
 
 @section Scripts {
+    <script src="~/js/claim.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
     <partial name="_ValidationScriptsPartial" />
 }
 
