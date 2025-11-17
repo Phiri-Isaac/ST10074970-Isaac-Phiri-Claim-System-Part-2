@@ -34,7 +34,7 @@ namespace ClaimSystem.Controllers
             if (!Directory.Exists(_uploadFolder))
                 Directory.CreateDirectory(_uploadFolder);
 
-            // Handle file upload (optional)
+            // Handle file upload
             if (supportingDocument != null && supportingDocument.Length > 0)
             {
                 var allowed = new[] { ".pdf", ".doc", ".docx" };
@@ -65,14 +65,18 @@ namespace ClaimSystem.Controllers
                 claim.SupportingDocumentPath = "/uploads/" + fileName;
             }
 
-            // Auto-calculate HoursWorked and TotalAmount
-            claim.AutoCalculate();
+            // Ensure HoursWorked is positive
+            if (claim.HoursWorked < 0 || claim.HourlyRate < 0)
+            {
+                TempData["Message"] = "Hours and hourly rate must be positive.";
+                TempData["AlertClass"] = "alert-danger";
+                return View(claim);
+            }
 
-            // Save in repository
+            // Assign ID and save
             claim.Id = ClaimRepository.NextId++;
             claim.Status = "Pending";
-            claim.DateSubmitted = DateTime.UtcNow;
-
+            claim.DateSubmitted = DateTime.UtcNow; // <-- Correct property name
             ClaimRepository.Claims.Add(claim);
 
             TempData["Message"] = $"✅ Claim #{claim.Id} submitted. Total payment: {claim.TotalAmount:C}";
@@ -92,16 +96,13 @@ namespace ClaimSystem.Controllers
         public IActionResult Approve(int id, string? approver = null)
         {
             var claim = ClaimRepository.Claims.FirstOrDefault(c => c.Id == id);
-
             if (claim != null)
             {
                 claim.Status = "Approved";
-
-                // Push 8 — set verified info
                 claim.VerifiedBy = approver ?? "HOD";
                 claim.VerifiedDate = DateTime.UtcNow;
 
-                TempData["Message"] = $"✅ Claim #{id} approved successfully.";
+                TempData["Message"] = $"✅ Claim #{id} approved.";
                 TempData["AlertClass"] = "alert-success";
             }
             else
@@ -109,7 +110,6 @@ namespace ClaimSystem.Controllers
                 TempData["Message"] = "Claim not found.";
                 TempData["AlertClass"] = "alert-danger";
             }
-
             return RedirectToAction("Manage");
         }
 
@@ -118,12 +118,10 @@ namespace ClaimSystem.Controllers
         public IActionResult Reject(int id, string? reason)
         {
             var claim = ClaimRepository.Claims.FirstOrDefault(c => c.Id == id);
-
             if (claim != null)
             {
                 claim.Status = "Rejected";
-                claim.Notes = reason;          // existing field
-                claim.HODComments = reason;    // ✅ Push 9 addition
+                claim.HODComments = reason;
 
                 TempData["Message"] = $"⚠️ Claim #{id} rejected.";
                 TempData["AlertClass"] = "alert-warning";
@@ -133,11 +131,10 @@ namespace ClaimSystem.Controllers
                 TempData["Message"] = "Claim not found.";
                 TempData["AlertClass"] = "alert-danger";
             }
-
             return RedirectToAction("Manage");
         }
 
-        // AUTO VERIFY (safe version)
+        // AUTO VERIFY
         [HttpPost]
         public IActionResult AutoVerify()
         {
@@ -146,23 +143,23 @@ namespace ClaimSystem.Controllers
 
             foreach (var claim in ClaimRepository.Claims.Where(c => c.Status == "Pending"))
             {
-                // Simple example rules
                 if (claim.HoursWorked <= 8 && claim.HourlyRate <= 1000)
                 {
                     claim.Status = "Approved";
+                    claim.VerifiedBy = "AutoVerifier";
+                    claim.VerifiedDate = DateTime.UtcNow;
                     autoApproved++;
                 }
                 else if (claim.HoursWorked > 40 || claim.HourlyRate > 5000)
                 {
                     claim.Status = "Flagged";
-                    claim.Notes = "Flagged by AutoVerify for manual review.";
+                    claim.HODComments = "Flagged by AutoVerify for manual review.";
                     flagged++;
                 }
             }
 
-            TempData["Message"] = $"AutoVerify complete. Approved: {autoApproved}, Flagged: {flagged}.";
+            TempData["Message"] = $"AutoVerify completed. Approved: {autoApproved}, Flagged: {flagged}.";
             TempData["AlertClass"] = "alert-info";
-
             return RedirectToAction("Manage");
         }
 

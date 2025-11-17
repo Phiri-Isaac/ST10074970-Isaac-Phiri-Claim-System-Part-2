@@ -2,14 +2,14 @@
 
 @{
     ViewData["Title"] = "Manage Claims";
-    var role = Context.Session.GetString("Role") ?? "Lecturer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2 class="text-center mb-4">Manage Claims</h2>
 
 @if (TempData["Message"] != null)
 {
-    <div class="alert @(TempData["AlertClass"] ?? "alert-info") text-center">
+    <div class="@(TempData["AlertClass"] ?? "alert-info") alert text-center fw-bold">
         @TempData["Message"]
     </div>
 }
@@ -24,7 +24,6 @@
                 <th>Hours Worked</th>
                 <th>Hourly Rate (R)</th>
                 <th>Total (R)</th>
-                <th>Date Submitted (UTC)</th>
                 <th>Status</th>
                 <th>Document</th>
                 <th>Actions</th>
@@ -35,53 +34,51 @@
             {
                 <tr>
                     <td>@claim.Id</td>
-                    <td>@(string.IsNullOrWhiteSpace(claim.LecturerName) ? "Not specified" : claim.LecturerName)</td>
+                    <td>@(string.IsNullOrWhiteSpace(claim.LecturerName) ? "<i>Not specified</i>" : claim.LecturerName)</td>
                     <td>@claim.HoursWorked.ToString("F2")</td>
                     <td>@claim.HourlyRate.ToString("F2")</td>
                     <td>@claim.TotalAmount.ToString("F2")</td>
-                    <td>@claim.DateSubmitted.ToString("yyyy-MM-dd HH:mm")</td>
                     <td>
-                        <span class="badge
-                            @(claim.Status == "Processed" ? "bg-success" :
-                              claim.Status.Contains("Approved") ? "bg-primary" :
-                              claim.Status == "Rejected" ? "bg-danger" :
-                              claim.Status == "Returned" ? "bg-warning text-dark" :
-                              "bg-secondary")">
+                        <span class="badge px-3 py-2 fs-6 @(claim.Status == "Approved" ? "bg-success" :
+                                                            claim.Status == "Rejected" ? "bg-danger" :
+                                                            claim.Status == "Verified" ? "bg-primary" : "bg-warning text-dark")">
                             @claim.Status
                         </span>
                     </td>
                     <td>
                         @if (!string.IsNullOrEmpty(claim.SupportingDocumentPath))
                         {
-                            <a href="@claim.SupportingDocumentPath" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                            <a href="@claim.SupportingDocumentPath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark-text"></i> View
+                            </a>
                         }
                         else
                         {
-                            <span>-</span>
+                            <span class="text-muted">None</span>
                         }
                     </td>
                     <td>
-                        @* Show approve/reject only to HOD, Manager, HR *@
-                        @if (role.Equals("HOD", System.StringComparison.OrdinalIgnoreCase)
-                             || role.Equals("Manager", System.StringComparison.OrdinalIgnoreCase)
-                             || role.Equals("HR", System.StringComparison.OrdinalIgnoreCase)
-                             || role.Equals("Admin", System.StringComparison.OrdinalIgnoreCase))
+                        @if (claim.Status == "Pending")
                         {
-                            <form asp-action="Approve" method="post" class="d-inline confirm-form">
+                            <form asp-action="Approve" asp-controller="Claim" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@claim.Id" />
-                                <button type="submit" class="btn btn-success btn-sm me-1">Approve</button>
+                                <button type="submit" class="btn btn-success btn-sm me-1" onclick="return confirm('Are you sure you want to APPROVE this claim?');">
+                                    <i class="bi bi-check-circle"></i> Approve
+                                </button>
                             </form>
 
-                            <form asp-action="Reject" method="post" class="d-inline confirm-form">
+                            <form asp-action="Reject" asp-controller="Claim" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@claim.Id" />
-                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to REJECT this claim?');">
+                                    <i class="bi bi-x-circle"></i> Reject
+                                </button>
                             </form>
                         }
                         else
                         {
-                            <span class="text-muted">No actions</span>
+                            <span class="text-muted">No action</span>
                         }
                     </td>
                 </tr>
@@ -94,25 +91,15 @@ else
     <div class="alert alert-info text-center">No claims have been submitted yet.</div>
 }
 
+
 <div class="text-center mt-4">
-    <a asp-action="Submit" class="btn btn-primary">Submit New Claim</a>
+    <form asp-action="AutoVerify" method="post" style="display:inline-block;margin-right:10px;">
+        <button type="submit" class="btn btn-outline-secondary px-4">
+            <i class="bi bi-shield-check"></i> Auto-Verify Claims
+        </button>
+    </form>
+    <a asp-action="Submit" asp-controller="Claim" class="btn btn-primary px-4">
+        <i class="bi bi-plus-circle"></i> Submit New Claim
+    </a>
 </div>
 
-@section Scripts {
-    <script>
-        document.querySelectorAll(".confirm-form").forEach(f => {
-            f.addEventListener("submit", function (e) {
-                const btn = this.querySelector("button");
-                const allowed = confirm("Are you sure you want to perform this action?");
-                if (!allowed) {
-                    e.preventDefault();
-                    return;
-                }
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerText = "Processing...";
-                }
-            });
-        });
-    </script>
-}
