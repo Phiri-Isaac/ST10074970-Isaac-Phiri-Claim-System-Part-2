@@ -12,10 +12,10 @@ namespace ClaimSystem.Models
         public string LecturerName { get; set; } = string.Empty;
 
         // NEW — Start and End times
-        [Required]
+        [Required(ErrorMessage = "Start time is required.")]
         public TimeSpan StartTime { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "End time is required.")]
         public TimeSpan EndTime { get; set; }
 
         [Required(ErrorMessage = "Hours worked is required.")]
@@ -26,13 +26,13 @@ namespace ClaimSystem.Models
         [Range(0.01, 1000000, ErrorMessage = "Hourly rate must be positive.")]
         public decimal HourlyRate { get; set; }
 
-        // Computed total (your original logic)
+        // Computed total
         public decimal TotalAmount => Decimal.Round(HoursWorked * HourlyRate, 2);
 
         [Required]
         public string Status { get; set; } = "Pending";
 
-        // ✅ NEW FIELDS YOU ASKED TO ADD
+        // Optional verification fields
         public string? VerifiedBy { get; set; }
         public DateTime? VerifiedDate { get; set; }
         public string? HODComments { get; set; }
