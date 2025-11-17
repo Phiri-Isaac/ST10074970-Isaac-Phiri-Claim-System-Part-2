@@ -65,7 +65,7 @@ namespace ClaimSystem.Controllers
                 claim.SupportingDocumentPath = "/uploads/" + fileName;
             }
 
-            // ✅ Push 6 — Auto-calculate HoursWorked and TotalAmount
+            // Auto-calculate HoursWorked and TotalAmount
             claim.AutoCalculate();
 
             // Save in repository
@@ -89,13 +89,17 @@ namespace ClaimSystem.Controllers
 
         // APPROVE CLAIM
         [HttpPost]
-        public IActionResult Approve(int id)
+        public IActionResult Approve(int id, string? approver = null)
         {
             var claim = ClaimRepository.Claims.FirstOrDefault(c => c.Id == id);
 
             if (claim != null)
             {
                 claim.Status = "Approved";
+
+                // Push 8 — set verified info
+                claim.VerifiedBy = approver ?? "HOD";
+                claim.VerifiedDate = DateTime.UtcNow;
 
                 TempData["Message"] = $"✅ Claim #{id} approved successfully.";
                 TempData["AlertClass"] = "alert-success";
