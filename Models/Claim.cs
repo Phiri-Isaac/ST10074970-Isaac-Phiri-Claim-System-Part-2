@@ -11,7 +11,7 @@ namespace ClaimSystem.Models
         [StringLength(100, ErrorMessage = "Lecturer name cannot exceed 100 characters.")]
         public string LecturerName { get; set; } = string.Empty;
 
-        // NEW — Start and End times
+        // Start and End times
         [Required(ErrorMessage = "Start time is required.")]
         public TimeSpan StartTime { get; set; }
 
@@ -42,7 +42,7 @@ namespace ClaimSystem.Models
 
         public DateTime DateSubmitted { get; set; } = DateTime.UtcNow;
 
-        // NEW — AutoCalculate method
+        // AutoCalculate method
         public void AutoCalculate()
         {
             if (EndTime > StartTime)
@@ -54,8 +54,7 @@ namespace ClaimSystem.Models
                 HoursWorked = 0;
             }
 
-            // Force recalculation by accessing computed property
-            var _ = TotalAmount;
+            var _ = TotalAmount; // ensures computed property is accessed
         }
     }
 }
