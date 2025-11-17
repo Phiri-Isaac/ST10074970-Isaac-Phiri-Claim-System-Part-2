@@ -32,7 +32,7 @@ namespace ClaimSystem.Models
         [Required]
         public string Status { get; set; } = "Pending";
 
-        // Optional verification fields
+        // Optional verification fields (Push 7)
         public string? VerifiedBy { get; set; }
         public DateTime? VerifiedDate { get; set; }
         public string? HODComments { get; set; }
@@ -42,7 +42,7 @@ namespace ClaimSystem.Models
 
         public DateTime DateSubmitted { get; set; } = DateTime.UtcNow;
 
-        // AutoCalculate method
+        // AutoCalculate method (Push 4 & 6)
         public void AutoCalculate()
         {
             if (EndTime > StartTime)
