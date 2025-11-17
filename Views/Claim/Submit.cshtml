@@ -23,16 +23,35 @@
         <span asp-validation-for="LecturerName" class="text-danger"></span>
     </div>
 
+    <!-- NEW StartTime field -->
+    <div class="mb-3">
+        <label asp-for="StartTime" class="form-label fw-semibold">Start Time</label>
+        <input asp-for="StartTime" class="form-control" type="time" onchange="autoCalc()" />
+        <span asp-validation-for="StartTime" class="text-danger"></span>
+    </div>
+
+    <!-- NEW EndTime field -->
+    <div class="mb-3">
+        <label asp-for="EndTime" class="form-label fw-semibold">End Time</label>
+        <input asp-for="EndTime" class="form-control" type="time" onchange="autoCalc()" />
+        <span asp-validation-for="EndTime" class="text-danger"></span>
+    </div>
+
     <div class="mb-3">
         <label asp-for="HoursWorked" class="form-label fw-semibold">Hours Worked</label>
-        <input asp-for="HoursWorked" class="form-control" type="number" step="0.01" />
+        <input asp-for="HoursWorked" class="form-control" readonly />
         <span asp-validation-for="HoursWorked" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="HourlyRate" class="form-label fw-semibold">Hourly Rate (R)</label>
-        <input asp-for="HourlyRate" class="form-control" type="number" step="0.01" />
+        <input asp-for="HourlyRate" class="form-control" type="number" step="0.01" onchange="autoCalc()" />
         <span asp-validation-for="HourlyRate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Total Amount (calculated)</label>
+        <input asp-for="TotalAmount" class="form-control" readonly />
     </div>
 
     <div class="mb-3">
@@ -46,18 +65,28 @@
             <i class="bi bi-send"></i> Submit Claim
         </button>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Total Payment (calculated)</label>
-        <div class="form-control" id="TotalPaymentDisplay">0.00</div>
-        <input type="hidden" name="TotalPayment" value="0" />
-    </div>
 </form>
 
 @section Scripts {
     <script src="~/js/claim.js"></script>
     <partial name="_ValidationScriptsPartial" />
 
-    <partial name="_ValidationScriptsPartial" />
-}
+    <script>
+        function autoCalc() {
+            let start = document.getElementById("StartTime").value;
+            let end = document.getElementById("EndTime").value;
+            let rate = parseFloat(document.getElementById("HourlyRate").value);
 
+            if (start && end && rate > 0) {
+                let startTime = new Date("2000-01-01 " + start);
+                let endTime = new Date("2000-01-01 " + end);
+
+                if (endTime > startTime) {
+                    let hours = (endTime - startTime) / (1000 * 60 * 60);
+                    document.getElementById("HoursWorked").value = hours.toFixed(2);
+                    document.getElementById("TotalAmount").value = (hours * rate).toFixed(2);
+                }
+            }
+        }
+    </script>
+}
