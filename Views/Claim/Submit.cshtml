@@ -23,14 +23,14 @@
         <span asp-validation-for="LecturerName" class="text-danger"></span>
     </div>
 
-    <!-- NEW StartTime field -->
+    <!-- StartTime field -->
     <div class="mb-3">
         <label asp-for="StartTime" class="form-label fw-semibold">Start Time</label>
         <input asp-for="StartTime" class="form-control" type="time" onchange="autoCalc()" />
         <span asp-validation-for="StartTime" class="text-danger"></span>
     </div>
 
-    <!-- NEW EndTime field -->
+    <!-- EndTime field -->
     <div class="mb-3">
         <label asp-for="EndTime" class="form-label fw-semibold">End Time</label>
         <input asp-for="EndTime" class="form-control" type="time" onchange="autoCalc()" />
@@ -85,7 +85,13 @@
                     let hours = (endTime - startTime) / (1000 * 60 * 60);
                     document.getElementById("HoursWorked").value = hours.toFixed(2);
                     document.getElementById("TotalAmount").value = (hours * rate).toFixed(2);
+                } else {
+                    document.getElementById("HoursWorked").value = "0.00";
+                    document.getElementById("TotalAmount").value = "0.00";
                 }
+            } else {
+                document.getElementById("HoursWorked").value = "0.00";
+                document.getElementById("TotalAmount").value = "0.00";
             }
         }
     </script>
