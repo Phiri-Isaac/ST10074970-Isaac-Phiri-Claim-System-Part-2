@@ -7,30 +7,45 @@ namespace ClaimSystem.Models
     {
         public int Id { get; set; }
 
+        // --- Basic Claim Info ---
         [Required(ErrorMessage = "Lecturer name is required.")]
         public string LecturerName { get; set; } = string.Empty;
 
-        [Range(0.01, 10000, ErrorMessage = "Hours worked must be greater than 0")]
+        [Range(0.01, 100000, ErrorMessage = "Hours worked must be greater than 0")]
         public decimal HoursWorked { get; set; }
 
         [Range(0.01, 1000000, ErrorMessage = "Hourly rate must be greater than 0")]
         public decimal HourlyRate { get; set; }
 
-        // Computed total
+        // --- Total Calculation ---
         public decimal TotalAmount => Math.Round(HoursWorked * HourlyRate, 2);
 
-        public string Status { get; set; } = "Pending";
+        // Backwards compatibility for old pages expecting "TotalPayment"
+        public decimal TotalPayment => TotalAmount;
 
+        // --- File Upload ---
         public string? SupportingDocumentPath { get; set; }
 
+        // Optional notes by lecturer
         public string? Notes { get; set; }
 
-        // HOD/Verification fields
+        // --- Submission Metadata ---
+        public DateTime DateSubmitted { get; set; } = DateTime.UtcNow;
+
+        // --- Status Tracking ---
+        public string Status { get; set; } = "Pending";
+
+        // --- HOD & Approval Workflow ---
         public string? VerifiedBy { get; set; }
         public DateTime? VerifiedDate { get; set; }
         public string? HODComments { get; set; }
 
-        // ✅ Add this property to fix the error
-        public DateTime DateSubmitted { get; set; } = DateTime.UtcNow;
-    }
+        // Last action description for audit logs
+        public string? LastActionNote { get; set; }
+
+        // --- Automation Flags ---
+        public bool IsAutoSafe { get; set; } = false;                // Normal claims auto-approved
+        public bool RequiresManagerApproval { get; set; } = false;   // High-hour/high-rate claims
+        public bool EscalatedToManager { get; set; } = false;        // Sent to manager
+    }
 }

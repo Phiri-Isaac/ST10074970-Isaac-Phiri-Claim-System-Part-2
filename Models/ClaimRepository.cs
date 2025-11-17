@@ -8,4 +8,3 @@ namespace ClaimSystem.Models
         public static int NextId { get; set; } = 1;
     }
 }
-

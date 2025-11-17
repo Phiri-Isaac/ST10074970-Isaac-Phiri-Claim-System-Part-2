@@ -14,8 +14,14 @@
     </div>
 }
 
-<form asp-action="Submit" asp-controller="Claim" method="post" enctype="multipart/form-data" class="shadow p-4 rounded bg-white" style="max-width:700px;margin:auto;">
+<form asp-action="Submit" asp-controller="Claim" method="post" enctype="multipart/form-data"
+      class="shadow p-4 rounded bg-white" style="max-width:700px;margin:auto;">
     @Html.AntiForgeryToken()
+
+    <!-- Hidden workflow metadata -->
+    <input type="hidden" asp-for="Status" />
+    <input type="hidden" asp-for="IsAutoSafe" />
+    <input type="hidden" asp-for="RequiresManagerApproval" />
 
     <div class="mb-3">
         <label asp-for="LecturerName" class="form-label fw-semibold">Lecturer Name</label>
@@ -35,29 +41,29 @@
         <span asp-validation-for="HourlyRate" class="text-danger"></span>
     </div>
 
+    <!-- Auto-calculated total -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Total Payment (Auto-Calculated)</label>
+        <div class="form-control bg-light" id="TotalPaymentDisplay">0.00</div>
+        <input type="hidden" asp-for="TotalPayment" />
+    </div>
+
+    <!-- Supporting document upload -->
     <div class="mb-3">
         <label class="form-label fw-semibold">Supporting Document (Optional)</label>
         <input type="file" name="supportingDocument" class="form-control" accept=".pdf,.doc,.docx" />
-        <div class="form-text">Max file size: 5 MB. Allowed: .pdf, .doc, .docx</div>
+        <span asp-validation-for="SupportingDocumentPath" class="text-danger"></span>
+        <div class="form-text">Max file size: 5 MB. Allowed: PDF, DOC, DOCX.</div>
     </div>
 
-    <div class="text-center mt-3">
+    <div class="text-center mt-4">
         <button type="submit" class="btn btn-primary px-4">
             <i class="bi bi-send"></i> Submit Claim
         </button>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Total Payment (calculated)</label>
-        <div class="form-control" id="TotalPaymentDisplay">0.00</div>
-        <input type="hidden" name="TotalPayment" value="0" />
     </div>
 </form>
 
 @section Scripts {
     <script src="~/js/claim.js"></script>
-    <partial name="_ValidationScriptsPartial" />
-
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"   />
 }
-
